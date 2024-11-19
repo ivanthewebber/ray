@@ -71,7 +71,7 @@ class JobAgentSubmissionBrowserClient(JobAgentSubmissionClient):
         super().__init__(*args, **kwargs)
         self._session.headers[
             "User-Agent"
-        ] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+            ] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"  # noqa: E501
 
 
 @pytest_asyncio.fixture
@@ -294,7 +294,6 @@ async def test_submit_job_rejects_browsers(
     # wheel into the conda spec, it links to the current Python site.
     monkeypatch.setenv("RAY_RUNTIME_ENV_LOCAL_DEV_MODE", "1")
 
-    # Instead of using the fixtured client, we stand up a similar version which uses a browser UA. We still grab the other one because it vblocks on the underlying agent starting up
     agent_client, head_client = job_sdk_client
     agent_address = agent_client._agent_address
     agent_client = JobAgentSubmissionBrowserClient(agent_address)
@@ -309,7 +308,7 @@ async def test_submit_job_rejects_browsers(
     )
 
     with pytest.raises(RuntimeError) as exc:
-        submit_result = await agent_client.submit_job_internal(request)
+        _ = await agent_client.submit_job_internal(request)
 
     assert "status code 405" in str(exc.value)
 
