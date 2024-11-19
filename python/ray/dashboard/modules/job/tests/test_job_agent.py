@@ -71,7 +71,7 @@ class JobAgentSubmissionBrowserClient(JobAgentSubmissionClient):
         super().__init__(*args, **kwargs)
         self._session.headers[
             "User-Agent"
-            ] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"  # noqa: E501
+        ] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"  # noqa: E501
 
 
 @pytest_asyncio.fixture
