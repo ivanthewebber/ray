@@ -337,7 +337,7 @@ class ArrowBlockAccessor(TableBlockAccessor):
 
     def _sample(self, n_samples: int, sort_key: "SortKey") -> "pyarrow.Table":
         indices = random.sample(range(self._table.num_rows), n_samples)
-        table = self._table.select(sort_key.get_columns())
+        table = self._table.select(sort_key.get_columns() or self._table.column_names)
         return transform_pyarrow.take_table(table, indices)
 
     def count(self, on: str) -> Optional[U]:

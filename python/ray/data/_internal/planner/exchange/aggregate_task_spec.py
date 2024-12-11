@@ -83,7 +83,7 @@ class SortAggregateTaskSpec(ExchangeTaskSpec):
         """Prune unused columns from block before aggregate."""
         prune_columns = True
         columns = set()
-        key = sort_key.get_columns()
+        key = sort_key.get_columns() or block.columns.to_list()
 
         if isinstance(key, str):
             columns.add(key)

@@ -2423,7 +2423,7 @@ class Dataset:
     @PublicAPI(api_group=SSR_API_GROUP)
     def sort(
         self,
-        key: Union[str, List[str]],
+        key: Union[str, List[str], None],
         descending: Union[bool, List[bool]] = False,
         boundaries: List[Union[int, float]] = None,
     ) -> "Dataset":
@@ -2463,7 +2463,7 @@ class Dataset:
         Time complexity: O(dataset size * log(dataset size / parallelism))
 
         Args:
-            key: The column or a list of columns to sort by.
+            key: The column or a list of columns to sort by. If None sorts by all columns (`list(df.columns)`).
             descending: Whether to sort in descending order. Must be a boolean or a list
                 of booleans matching the number of the columns.
             boundaries: The list of values based on which to repartition the dataset.
@@ -2481,8 +2481,7 @@ class Dataset:
         Raises:
             ``ValueError``: if the sort key is None.
         """
-        if key is None:
-            raise ValueError("The 'key' parameter cannot be None for sorting.")
+
         sort_key = SortKey(key, descending, boundaries)
         plan = self._plan.copy()
         op = Sort(

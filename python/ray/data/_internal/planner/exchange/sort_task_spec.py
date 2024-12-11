@@ -43,6 +43,7 @@ class SortKey:
                 )
             if len(set(descending)) != 1:
                 raise ValueError("Sorting with mixed key orders not supported yet.")
+        assert descending, "Descending should not be empty:" + str(descending)
         self._columns = key
         self._descending = descending
         if boundaries:
@@ -61,14 +62,16 @@ class SortKey:
     def get_descending(self) -> bool:
         return self._descending[0]
 
-    def to_arrow_sort_args(self) -> List[Tuple[str, str]]:
+    def to_arrow_sort_args(self, col_names: list[str]) -> List[Tuple[str, str]]:
+        cols = self._columns if self._columns else col_names
         return [
             (key, "descending" if self._descending[0] else "ascending")
-            for key in self._columns
+            for key in cols
         ]
 
-    def to_pandas_sort_args(self) -> Tuple[List[str], bool]:
-        return self._columns, not self._descending[0]
+    def to_pandas_sort_args(self, col_names: list[str]) -> Tuple[List[str], bool]:
+        cols = self._columns if self._columns else col_names
+        return cols, not self._descending[0]
 
     def validate_schema(self, schema: Optional[Union[type, "pyarrow.lib.Schema"]]):
         """Check the key function is valid on the given schema."""
@@ -165,7 +168,6 @@ class SortTaskSpec(ExchangeTaskSpec):
         partition the domain into ranges with approximately equally many elements.
         Each boundary item is a tuple of a form (col1_value, col2_value, ...).
         """
-        columns = sort_key.get_columns()
         n_samples = int(num_reducers * 10 / len(blocks))
 
         sample_block = cached_remote_fn(_sample_block)
@@ -195,6 +197,7 @@ class SortTaskSpec(ExchangeTaskSpec):
         for sample in samples:
             builder.add_block(sample)
         samples_table = builder.build()
+        columns = sort_key.get_columns()
         samples_dict = BlockAccessor.for_block(samples_table).to_numpy(columns=columns)
         # This zip does the transposition from list of column values to list of tuples.
         samples_list = list(zip(*samples_dict.values()))

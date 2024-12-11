@@ -741,6 +741,12 @@ def find_partition_index(
     sort_key: "SortKey",
 ) -> int:
     columns = sort_key.get_columns()
+    if not columns:
+        if isinstance(table, "pandas.DataFrame"):
+            columns = table.columns.to_list()
+        else:
+            assert isinstance(table, "pyarrow.Table")
+            columns = table.column_names
     descending = sort_key.get_descending()
 
     left, right = 0, len(table)

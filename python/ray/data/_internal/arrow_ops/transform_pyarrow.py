@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 def sort(table: "pyarrow.Table", sort_key: "SortKey") -> "pyarrow.Table":
     import pyarrow.compute as pac
 
-    indices = pac.sort_indices(table, sort_keys=sort_key.to_arrow_sort_args())
+    indices = pac.sort_indices(table, sort_keys=sort_key.to_arrow_sort_args(table.column_names))
     return take_table(table, indices)
 
 
@@ -330,7 +330,7 @@ def concat_and_sort(
     import pyarrow.compute as pac
 
     ret = concat(blocks)
-    indices = pac.sort_indices(ret, sort_keys=sort_key.to_arrow_sort_args())
+    indices = pac.sort_indices(ret, sort_keys=sort_key.to_arrow_sort_args(ret.column_names))
     return take_table(ret, indices)
 
 

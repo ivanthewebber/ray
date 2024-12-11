@@ -419,7 +419,7 @@ class PandasBlockAccessor(TableBlockAccessor):
         return PandasBlockBuilder._empty_table()
 
     def _sample(self, n_samples: int, sort_key: "SortKey") -> "pandas.DataFrame":
-        return self._table[sort_key.get_columns()].sample(n_samples, ignore_index=True)
+        return self._table[sort_key.get_columns() or self._table.columns.to_list()].sample(n_samples, ignore_index=True)
 
     def _apply_agg(
         self, agg_fn: Callable[["pandas.Series", bool], U], on: str
@@ -505,7 +505,7 @@ class PandasBlockAccessor(TableBlockAccessor):
             # so calling sort_indices() will raise an error.
             return [self._empty_table() for _ in range(len(boundaries) + 1)]
 
-        columns, ascending = sort_key.to_pandas_sort_args()
+        columns, ascending = sort_key.to_pandas_sort_args(self.column_names())
         table = self._table.sort_values(by=columns, ascending=ascending)
         if len(boundaries) == 0:
             return [table]
@@ -605,7 +605,7 @@ class PandasBlockAccessor(TableBlockAccessor):
             # Handle blocks of different types.
             blocks = TableBlockAccessor.normalize_block_types(blocks, "pandas")
             ret = pd.concat(blocks, ignore_index=True)
-            columns, ascending = sort_key.to_pandas_sort_args()
+            columns, ascending = sort_key.to_pandas_sort_args(ret.columns.tolist())
             ret = ret.sort_values(by=columns, ascending=ascending)
         return ret, PandasBlockAccessor(ret).get_metadata(exec_stats=stats.build())
 
